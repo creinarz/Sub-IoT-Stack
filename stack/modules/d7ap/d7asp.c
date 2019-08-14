@@ -122,6 +122,7 @@ static state_t NGDEF(_state) = D7ASP_STATE_STOPPED;
 #define d7asp_state NG(_state)
 
 static void switch_state(state_t new_state);
+static d7asp_master_session_t* get_master_session_from_token(uint8_t session_token);
 
 static void free_master_session(d7asp_master_session_t* session) {
     DPRINT("Free master session %i", session->token);
@@ -150,10 +151,15 @@ static void free_master_session(d7asp_master_session_t* session) {
 static d7asp_master_session_t* alloc_master_session() {
     for(uint8_t i = 0; i < MODULE_D7AP_MAX_SESSION_COUNT; i++) {
         if(master_sessions[i].token == 0) {
+            uint8_t token;
             do {
-                master_sessions[i].token = get_rnd() % 0xFF;
-            } while(master_sessions[i].token == 0);
+                token = get_rnd() % 0xFF;
+                if ((token != 0) &&
+                    (get_master_session_from_token(token) == NULL))
+                    break;
+            } while(1);
 
+            master_sessions[i].token = token;
             assert(master_sessions[i].state == D7ASP_MASTER_SESSION_IDLE);
             master_sessions[i].previous = latest_session;
             if (latest_session)
