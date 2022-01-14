@@ -44,6 +44,9 @@ typedef struct {
   pin_id_t miso_pin;
   pin_id_t mosi_pin;
   uint32_t alternate;
+  uint32_t alternate_sck;
+  uint32_t alternate_miso;
+  uint32_t alternate_mosi;
   SPI_TypeDef* spi;
 } spi_port_t;
 
@@ -60,6 +63,8 @@ typedef struct {
   pin_id_t scl_pin;
   pin_id_t sda_pin;
   uint32_t alternate;
+  uint32_t alternate_scl;
+  uint32_t alternate_sda;
 } i2c_port_t;
 
 

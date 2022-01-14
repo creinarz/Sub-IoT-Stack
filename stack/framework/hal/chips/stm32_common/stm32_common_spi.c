@@ -82,13 +82,17 @@ static void ensure_slaves_deselected(spi_handle_t* spi) {
 
 static void init_pins(spi_handle_t* spi) {
   GPIO_InitTypeDef GPIO_InitStruct;
+  
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   GPIO_InitStruct.Alternate = spi_ports[spi->spi_port_number].alternate;
-
+  
+  GPIO_InitStruct.Alternate = spi_ports[spi->spi_port_number].alternate_sck;
   hw_gpio_configure_pin_stm(spi_ports[spi->spi_port_number].sck_pin, &GPIO_InitStruct);
+  GPIO_InitStruct.Alternate = spi_ports[spi->spi_port_number].alternate_miso;
   hw_gpio_configure_pin_stm(spi_ports[spi->spi_port_number].miso_pin, &GPIO_InitStruct);
+  GPIO_InitStruct.Alternate = spi_ports[spi->spi_port_number].alternate_mosi;
   hw_gpio_configure_pin_stm(spi_ports[spi->spi_port_number].mosi_pin, &GPIO_InitStruct);
 }
 
