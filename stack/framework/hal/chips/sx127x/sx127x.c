@@ -113,6 +113,7 @@
   #error "Invalid configuration"
 #endif
 
+
 #define LORA_MAC_PRIVATE_SYNCWORD                   0x12 // Sync word for Private LoRa networks
 #define LORA_MAC_PUBLIC_SYNCWORD                    0x34 // Sync word for Public LoRa networks
 #define RF_MID_BAND_THRESH                          525000000
@@ -1261,7 +1262,62 @@ void hw_radio_enable_preloading(bool enable) {
   enable_preloading = enable;
 }
 
-void hw_radio_set_tx_power(int8_t eirp) {
+static uint8_t hw_radio_get_pa_select( uint32_t channel )
+{
+    return RF_PACONFIG_PASELECT_PABOOST;
+}
+
+
+#define SX1272_REG_PADAC 0x5A
+
+static void hw_radio_sx1272_set_tx_power(int8_t power)
+{
+  uint8_t paConfig = 0;
+  uint8_t paDac = 0;
+
+  paConfig = read_reg(REG_PACONFIG);
+  paDac = read_reg(SX1272_REG_PADAC);
+ 
+  // Quick Hack since SX1272GetPaSelect always returns RF_CONFIG_PASELECT_PA_BOOST
+  paConfig = (paConfig & RF_PACONFIG_PASELECT_MASK) | hw_radio_get_pa_select(0);
+ 
+  if ((paConfig & RF_PACONFIG_PASELECT_PABOOST) == RF_PACONFIG_PASELECT_PABOOST) {
+    if (power > 17) {
+      paDac = (paDac & RF_PADAC_20DBM_MASK) | RF_PADAC_20DBM_ON;
+    } else {
+      paDac = (paDac & RF_PADAC_20DBM_MASK) | RF_PADAC_20DBM_OFF;
+    }
+    if ((paDac & RF_PADAC_20DBM_ON) == RF_PADAC_20DBM_ON) {
+      if (power < 5) {
+        power = 5;
+      }
+      if (power > 20) {
+        power = 20;
+      }
+      paConfig = (paConfig & RFLR_PACONFIG_OUTPUTPOWER_MASK) | (uint8_t)((uint16_t)(power - 5) & 0x0F);
+    } else {
+      if (power < 2) {
+        power = 2;
+      }
+      if (power > 17) {
+        power = 17;
+      }
+      paConfig = (paConfig & RFLR_PACONFIG_OUTPUTPOWER_MASK) | (uint8_t)((uint16_t)(power - 2) & 0x0F);
+    }
+  } else {
+    if (power < -1) {
+      power = -1;
+    }
+    if (power > 14) {
+      power = 14;
+    }
+    paConfig = (paConfig & RFLR_PACONFIG_OUTPUTPOWER_MASK) | (uint8_t)((uint16_t)(power + 1) & 0x0F);
+  }
+  write_reg(REG_PACONFIG, paConfig);
+  write_reg(SX1272_REG_PADAC, paDac);
+}
+
+static void hw_radio_sx1276_set_tx_power(int8_t eirp) {
   if(eirp < -5) {
     eirp = -5;
     DPRINT("The given eirp is too low, adjusted to %d dBm, offset excluded", eirp);
@@ -1302,6 +1358,14 @@ void hw_radio_set_tx_power(int8_t eirp) {
     write_reg(REG_PACONFIG, 0x70 | (uint8_t)(eirp));
 #endif
 
+}
+
+void hw_radio_set_tx_power(int8_t eirp)
+{
+  if (is_sx1272)
+    hw_radio_sx1272_set_tx_power(eirp);
+  else
+    hw_radio_sx1276_set_tx_power(eirp);
 }
 
 void hw_radio_switch_longRangeMode(bool use_lora) {
