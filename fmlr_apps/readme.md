@@ -1,5 +1,5 @@
-# DASH7 GETTING STARTED
-## DASH7 source code for Miromico FMLR STM SX1272 modules
+# DASH7 FOR Miromico FMLR STM modules
+## DASH7 source code for Miromico FMLR STML0 + SX1272 modules
 - Copy or clone the source code from https://github.com/creinarz/Sub-IoT-Stack.git
  
 - Compile with the following CMake configuration arguments:
@@ -13,8 +13,8 @@
   I place these options in VSCode settings.json
 
 ## You will also need pyd7a
-This is a collection of python modules to support the DASH7 protocol. Unfortunately pyd7a and all example applications are python 2.7 but I think there is an update to python 3 in the making.
-- Copy or clone from https://github.com/Sub-IoT/pyd7a
+This is a collection of python modules to support the DASH7 protocol. Unfortunately pyd7a and all example applications are python 2.7 but I think there is an update to python 3 in the making. This version inlcudes modifiede examples for the FMLR STM
+- Copy or clone from https://github.com/creinarz/pyd7a.git
 - You will find the installation instructions in README.md
 
 
@@ -37,14 +37,14 @@ Red LED flashes if no acknowledge is received within timeout
 - cd to `your/path/to/pyd7a`
 - Run `PYTHONPATH=. python -u examples/unsolicited_response_logger.py -d /dev/cu.usbserial-XXXXXXXX` on the PC.
 
-#### `query_nodes.py` for `fmlr_sensor_pull`
+#### `fmlr_query_nodes.py` for `fmlr_sensor_pull`
 Uses background scanning to wait for a temperature/humidity request from the gateway.
 Green LED flashes when new sensor data is available. I have been told it's possible to go as low as 30uA with background scanning. Not for coin cell battery but an AA or A sized LiSoCl4 battery or similar should do just fine for a few years.
 - cd to `your/path/to/pyd7a`
-- Run `PYTHONPATH=. python -u examples/query_nodes.py -d /dev/cu.usbserial-XXXXXXXX` on the PC to query the nodes.
+- Run `PYTHONPATH=. python -u examples/fmlr_query_nodes.py -d /dev/cu.usbserial-XXXXXXXX` on the PC to query the nodes.
 
 
-### `sensor_push_led.py` for `fmlr_senosr_push_led`
+### `fmlr_sensor_push_led.py` for `fmlr_sensor_push_led`
 This is the most interesting application, it sends temperature and humidity using unsolicited response messages every 30 seconds and waits for a command from the gateway to turn the blue LED on or off using either background scanning or dormant sessions. The latter means that the LED's are only updated as a response to a message from the sensor.
 
 Green LED flashes when the sensor receives an acknowledge from the gateway. Red LED flashes if no acknowledge is received within afew seconds.
@@ -52,7 +52,7 @@ Data is forwarded to an MQTT broker and can be seen there.
 
 - Run MQTT broker on local host 
 - cd to `your/path/to/pyd7a`
-- Run  `PYTHONPATH=. python -u examples/sensor_push_led.py -d /dev/cu.usbserial-XXXXXXXX`
+- Run  `PYTHONPATH=. python -u examples/fmlr_sensor_push_led.py -d /dev/cu.usbserial-XXXXXXXX`
 - Add option `-b hostname` if you are using a remote broker. 
 
 To turn the blue LED on or off do:
