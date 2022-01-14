@@ -1,7 +1,7 @@
 # DASH7 GETTING STARTED
 ## DASH7 source code for Miromico FMLR STM SX1272 modules
 - Copy or clone the source code from https://github.com/creinarz/Sub-IoT-Stack.git
-- Unzip `fmlr_apps` to some directory and modfify `DAPP_EXTRA_APPS_DIR` accordingly. I just place them in your/path/to/Sub-IoT-Stack untill I find a better way to organize off tree applications. 
+ 
 - Compile with the following CMake configuration arguments:
   - `DPLATFORM=FMLR_72_X_STL0Z`
   - `DAPP_EXTRA_APPS_DIR=${PROJECT_SOURCE_DIR}/../fmlr_apps`
